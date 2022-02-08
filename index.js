@@ -1,51 +1,60 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const {XMLParser, XMLBuilder, XMLValidator} = require('fast-xml-parser');
+import fs from 'fs';
+import path from 'path';
+import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
 
-const CompoundRef = require('./lib/CompoundRef.js');
+import CompoundRef from './lib/CompoundRef.js';
 
-const self = module.exports;
+let self = {};
 
-self.build = (inputPath, sourcePath) => {
+self.build = (inputPath, sourcePath, templates, output) => {
+  // Construct XML Parser with options
   const parser = new XMLParser({
     ignoreAttributes : false,
     attributeNamePrefix : "$"
   });
 
+  // Provider reads files
   const provider = {
-    sourceFile: (name) => {
+    file: (name) => {
       if (!sourcePath) return null;
 
-      let file = path.join(sourcePath, name);
+      const file = path.join(sourcePath, name);
       console.log(`Reading file ${file}`); // TODO: Verbose
       return fs.readFileSync(file, 'utf8');
     },
 
-    xmlFile: (name) => {
-      let file = path.join(inputPath, `${name}.xml`);
+    xml: (name) => {
+      const file = path.join(inputPath, `${name}.xml`);
       console.log(`Reading file ${file}`); // TODO: Verbose
       return parser.parse(fs.readFileSync(file, 'utf8'));
     }
   };
 
-  const index = provider.xmlFile('index');
-
-  // Compounds come from index.xml and enumerates all of the:
-  // - classes
-  // - files
-  // - enums
-  // - namespaces
+  const index = provider.xml('index');
 
   // Filter the compounds to remove any unwanted categories
   // TODO
   // Do I want to do this here?
-  const filteredCompounds = index.doxygenindex.compound;
+  let filteredCompounds = index.doxygenindex.compound;
+
+  // filteredCompounds = filteredCompounds.slice(0, 1); // HAX
 
   const compoundRefs = filteredCompounds.map(compound => {
     return new CompoundRef(compound, provider);
   });
 
-  console.log(compoundRefs[0].compound);
+  // HAX
+  // console.log(compoundRefs[0].compound);
+  compoundRefs.forEach(compoundRef => {
+    if (templates[compoundRef.kind]) {
+      fs.writeFileSync(`${output}/${compoundRef.refId}.adoc`, templates[compoundRef.kind](compoundRef.compound));
+      fs.writeFileSync(`${output}/${compoundRef.refId}.json`, JSON.stringify(compoundRef.compound, null, 2));
+    } else {
+      console.error(`Missing template for ${compoundRef.kind}`);
+    }
+  });
 };
+
+export default self;
