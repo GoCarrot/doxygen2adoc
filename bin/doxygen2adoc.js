@@ -8,17 +8,22 @@ import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 
 const templateNames = [
-  'struct', 'class', 'file', 'dir'
+  'struct', 'class', 'file', 'dir',
 ];
 
 const templates = templateNames.reduce((hsh, name) => {
   hsh[`template.${name}`] = {
-    normalize: true
+    normalize: true,
   };
   return hsh;
 }, {});
 
 const cmdBuild = (argv) => {
+  // Register partial templates
+  Object.keys(argv.partial).forEach((key) => {
+    Handlebars.registerPartial(key, fs.readFileSync(argv.partial[key], 'utf-8'));
+  });
+
   // Compile the templates
   const compiledTemplates = templateNames.reduce((hsh, name) => {
     if (!argv.template[name]) return hsh;
@@ -58,6 +63,10 @@ yargs(process.argv.slice(2))
         describe: 'Destination path for generated files',
         normalize: true,
         demandOption: true,
+      },
+      'partial': {
+        describe: 'Partial templates that should be registered with Handlebars',
+        default: {},
       },
     }))
     // TODO: quiet option?

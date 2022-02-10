@@ -7,8 +7,10 @@
     "extends": [
         "google"
     ],
+    "parser": "babel-eslint",
     "parserOptions": {
-        "ecmaVersion": "latest"
+        "sourceType": "module",
+        "allowImportExportEverywhere": true
     },
     "rules": {
     }
