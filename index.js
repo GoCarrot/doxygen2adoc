@@ -28,10 +28,11 @@ self.build = (inputPath, sourcePath, templates, output) => {
       if (tagName === 'type') {
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
         const combinedType = type.reduce((str, elem) => {
-          if (elem.ref) {
-            return str + elem.ref[0].$text;
-          }
-          return str + elem.$text;
+          // TODO: Here is where we turn the ref into a link to docs for that ref
+          const typeText = elem.ref ?
+            elem.ref[0].$text : elem.$text;
+
+          return `${str} ${typeText}`;
         }, '');
         return combinedType;
       }
