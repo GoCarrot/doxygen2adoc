@@ -2,17 +2,41 @@
 
 import fs from 'fs';
 import path from 'path';
-import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
 
 import CompoundRef from './lib/CompoundRef.js';
 
 let self = {};
 
 self.build = (inputPath, sourcePath, templates, output) => {
-  // Construct XML Parser with options
+  // Parse tag values which contain order-dependent XML
+  const tagValueParser = new XMLParser({
+    ignoreAttributes : false,
+    attributeNamePrefix : '$',
+    textNodeName: '$text',
+    preserveOrder: true
+  });
+
+  // XML Parser for general use
   const parser = new XMLParser({
     ignoreAttributes : false,
-    attributeNamePrefix : "$"
+    attributeNamePrefix : '$',
+    stopNodes: [
+      'doxygen.compounddef.sectiondef.memberdef.type'
+    ],
+    tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
+      if (tagName === 'type') {
+        const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
+        const combinedType = type.reduce((str, elem) => {
+          if (elem.ref) {
+            return str + elem.ref[0].$text;
+          }
+          return str + elem.$text;
+        }, '');
+        return combinedType;
+      }
+      return undefined;
+    }
   });
 
   // Provider reads files
@@ -35,18 +59,16 @@ self.build = (inputPath, sourcePath, templates, output) => {
   const index = provider.xml('index');
 
   // Filter the compounds to remove any unwanted categories
-  // TODO
-  // Do I want to do this here?
-  let filteredCompounds = index.doxygenindex.compound;
-
-  // filteredCompounds = filteredCompounds.slice(0, 1); // HAX
+  // TODO: Do I want to do this here?
+  const filteredKinds = ['file', 'dir'];
+  let filteredCompounds = index.doxygenindex.compound.filter(compound => {
+    return !filteredKinds.includes(compound.$kind);
+  });
 
   const compoundRefs = filteredCompounds.map(compound => {
     return new CompoundRef(compound, provider);
   });
 
-  // HAX
-  // console.log(compoundRefs[0].compound);
   compoundRefs.forEach(compoundRef => {
     if (templates[compoundRef.kind]) {
       fs.writeFileSync(`${output}/${compoundRef.refId}.adoc`, templates[compoundRef.kind](compoundRef.compound));
