@@ -8,7 +8,7 @@ import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 
 const templateNames = [
-  'struct', 'class', 'file', 'dir',
+  'struct', 'class', 'file', 'dir', 'index'
 ];
 
 const templates = templateNames.reduce((hsh, name) => {

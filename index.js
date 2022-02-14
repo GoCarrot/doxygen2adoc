@@ -73,11 +73,14 @@ self.build = (inputPath, sourcePath, templates, output) => {
   compoundRefs.forEach(compoundRef => {
     if (templates[compoundRef.kind]) {
       fs.writeFileSync(`${output}/${compoundRef.refId}.adoc`, templates[compoundRef.kind](compoundRef.compound));
-      fs.writeFileSync(`${output}/${compoundRef.refId}.json`, JSON.stringify(compoundRef.compound, null, 2));
+      // fs.writeFileSync(`${output}/${compoundRef.refId}.json`, JSON.stringify(compoundRef.compound, null, 2));
     } else {
       console.error(`Missing template for ${compoundRef.kind}`);
     }
   });
+
+  // Write out index
+  fs.writeFileSync(`${output}/index.adoc`, templates['index']({items:compoundRefs}));
 };
 
 export default self;
