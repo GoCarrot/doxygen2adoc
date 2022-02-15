@@ -2,27 +2,27 @@
 
 import fs from 'fs';
 import path from 'path';
-import { XMLParser } from 'fast-xml-parser';
+import {XMLParser} from 'fast-xml-parser';
 
 import CompoundRef from './lib/CompoundRef.js';
 
-let self = {};
+const self = {};
 
 self.build = (inputPath, sourcePath, templates, output) => {
   // Parse tag values which contain order-dependent XML
   const tagValueParser = new XMLParser({
-    ignoreAttributes : false,
-    attributeNamePrefix : '$',
+    ignoreAttributes: false,
+    attributeNamePrefix: '$',
     textNodeName: '$text',
-    preserveOrder: true
+    preserveOrder: true,
   });
 
   // XML Parser for general use
   const parser = new XMLParser({
-    ignoreAttributes : false,
-    attributeNamePrefix : '$',
+    ignoreAttributes: false,
+    attributeNamePrefix: '$',
     stopNodes: [
-      'doxygen.compounddef.sectiondef.memberdef.type'
+      'doxygen.compounddef.sectiondef.memberdef.type',
     ],
     tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
       if (tagName === 'type') {
@@ -37,7 +37,7 @@ self.build = (inputPath, sourcePath, templates, output) => {
         return combinedType;
       }
       return undefined;
-    }
+    },
   });
 
   // Provider reads files
@@ -54,7 +54,7 @@ self.build = (inputPath, sourcePath, templates, output) => {
       const file = path.join(inputPath, `${name}.xml`);
       console.log(`Reading file ${file}`); // TODO: Verbose
       return parser.parse(fs.readFileSync(file, 'utf8'));
-    }
+    },
   };
 
   const index = provider.xml('index');
@@ -62,25 +62,28 @@ self.build = (inputPath, sourcePath, templates, output) => {
   // Filter the compounds to remove any unwanted categories
   // TODO: Do I want to do this here?
   const filteredKinds = ['file', 'dir'];
-  let filteredCompounds = index.doxygenindex.compound.filter(compound => {
+  const filteredCompounds = index.doxygenindex.compound.filter((compound) => {
     return !filteredKinds.includes(compound.$kind);
   });
 
-  const compoundRefs = filteredCompounds.map(compound => {
+  const compoundRefs = filteredCompounds.map((compound) => {
     return new CompoundRef(compound, provider);
   });
 
-  compoundRefs.forEach(compoundRef => {
+  compoundRefs.forEach((compoundRef) => {
     if (templates[compoundRef.kind]) {
-      fs.writeFileSync(`${output}/${compoundRef.refId}.adoc`, templates[compoundRef.kind](compoundRef.compound));
-      // fs.writeFileSync(`${output}/${compoundRef.refId}.json`, JSON.stringify(compoundRef.compound, null, 2));
+      fs.writeFileSync(`${output}/${compoundRef.refId}.adoc`,
+          templates[compoundRef.kind](compoundRef.compound));
     } else {
       console.error(`Missing template for ${compoundRef.kind}`);
     }
   });
 
   // Write out index
-  fs.writeFileSync(`${output}/index.adoc`, templates['index']({items:compoundRefs}));
+  const compounds = compoundRefs.reduce((arr, ref) => {
+    arr.concat(ref.compound);
+  }, []);
+  fs.writeFileSync(`${output}/index.adoc`, templates['index']({items: compounds}));
 };
 
 export default self;
