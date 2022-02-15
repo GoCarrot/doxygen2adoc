@@ -8,7 +8,7 @@ import CompoundRef from './lib/CompoundRef.js';
 
 const self = {};
 
-self.build = (inputPath, sourcePath, templates, output) => {
+self.build = (inputPath, sourcePath) => {
   // Parse tag values which contain order-dependent XML
   const tagValueParser = new XMLParser({
     ignoreAttributes: false,
@@ -66,24 +66,9 @@ self.build = (inputPath, sourcePath, templates, output) => {
     return !filteredKinds.includes(compound.$kind);
   });
 
-  const compoundRefs = filteredCompounds.map((compound) => {
+  return filteredCompounds.map((compound) => {
     return new CompoundRef(compound, provider);
   });
-
-  compoundRefs.forEach((compoundRef) => {
-    if (templates[compoundRef.kind]) {
-      fs.writeFileSync(`${output}/${compoundRef.refId}.adoc`,
-          templates[compoundRef.kind](compoundRef.compound));
-    } else {
-      console.error(`Missing template for ${compoundRef.kind}`);
-    }
-  });
-
-  // Write out index
-  const compounds = compoundRefs.reduce((arr, ref) => {
-    arr.concat(ref.compound);
-  }, []);
-  fs.writeFileSync(`${output}/index.adoc`, templates['index']({items: compounds}));
 };
 
 export default self;

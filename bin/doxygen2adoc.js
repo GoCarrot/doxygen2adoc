@@ -8,7 +8,7 @@ import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 
 const templateNames = [
-  'struct', 'class', 'file', 'dir', 'index',
+  'struct', 'class', 'file', 'dir', 'index', 'nav'
 ];
 
 const templates = templateNames.reduce((hsh, name) => {
@@ -32,7 +32,29 @@ const cmdBuild = (argv) => {
     return hsh;
   }, {});
 
-  doxygen2adoc.build(argv.input, argv.source, compiledTemplates, argv.output);
+  const compoundRefs = doxygen2adoc.build(argv.input, argv.source);
+
+  compoundRefs.forEach((compoundRef) => {
+    if (compiledTemplates[compoundRef.kind]) {
+      fs.writeFileSync(`${argv.output}/${compoundRef.refId}.adoc`,
+          compiledTemplates[compoundRef.kind](compoundRef.compound));
+    } else {
+      console.error(`Missing template for ${compoundRef.kind}`);
+    }
+  });
+
+  // Write out index and nav
+  const compounds = compoundRefs.reduce((arr, ref) => {
+    return arr.concat(ref.compound);
+  }, []);
+
+  if (compiledTemplates['index']) {
+    fs.writeFileSync(`${argv.output}/index.adoc`, compiledTemplates['index']({items: compounds}));
+  }
+
+  if (compiledTemplates['nav']) {
+    fs.writeFileSync(argv.nav, compiledTemplates['nav']({items: compounds}));
+  }
 };
 
 yargs(process.argv.slice(2))
@@ -68,6 +90,10 @@ yargs(process.argv.slice(2))
         describe: 'Partial templates that should be registered with Handlebars',
         default: {},
       },
+      'nav': {
+        describe: 'Generate navigation file at the provided path',
+        normalize: true
+      }
     }))
     // TODO: quiet option?
     .demandCommand(1, 'Specify at least one command')
