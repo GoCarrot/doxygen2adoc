@@ -2,13 +2,14 @@
 'use strict';
 
 import fs from 'fs';
+import path from 'path';
 import YAML from 'yaml';
 import yargs from 'yargs';
 import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 
 const templateNames = [
-  'struct', 'class', 'file', 'dir', 'index', 'nav'
+  'struct', 'class', 'file', 'dir', 'index', 'nav', 'page'
 ];
 
 const templates = templateNames.reduce((hsh, name) => {
@@ -34,7 +35,23 @@ const cmdBuild = (argv) => {
 
   const compoundRefs = doxygen2adoc.build(argv.input, argv.source);
 
-  compoundRefs.forEach((compoundRef) => {
+  // Exclude unwanted compounds from the write
+  const filteredRefs = compoundRefs.filter((compound) => {
+    return !argv.exclude.includes(compound.kind);
+  });
+
+  // Clean output directory
+  if (argv.clean) {
+    const files = fs.readdirSync(argv.output);
+    for (const file of files) {
+      if (file.endsWith('.adoc')) {
+        fs.unlinkSync(path.join(argv.output, file));
+      }
+    }
+  }
+
+  // Write out componds
+  filteredRefs.forEach((compoundRef) => {
     if (compiledTemplates[compoundRef.kind]) {
       fs.writeFileSync(`${argv.output}/${compoundRef.refId}.adoc`,
           compiledTemplates[compoundRef.kind](compoundRef.compound));
@@ -44,7 +61,7 @@ const cmdBuild = (argv) => {
   });
 
   // Write out index and nav
-  const compounds = compoundRefs.reduce((arr, ref) => {
+  const compounds = filteredRefs.reduce((arr, ref) => {
     return arr.concat(ref.compound);
   }, []);
 
@@ -93,6 +110,16 @@ yargs(process.argv.slice(2))
       'nav': {
         describe: 'Generate navigation file at the provided path',
         normalize: true
+      },
+      'exclude': {
+        describe: 'Exclude these kinds of compounds',
+        array: true,
+        default: ['file', 'dir']
+      },
+      'clean': {
+        describe: 'Delete contents of output before writing new files.',
+        boolean: true,
+        default: false
       }
     }))
     // TODO: quiet option?

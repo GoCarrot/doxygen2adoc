@@ -57,16 +57,9 @@ self.build = (inputPath, sourcePath) => {
     },
   };
 
+  // Read the index, create compound refs and return them
   const index = provider.xml('index');
-
-  // Filter the compounds to remove any unwanted categories
-  // TODO: Do I want to do this here?
-  const filteredKinds = ['file', 'dir'];
-  const filteredCompounds = index.doxygenindex.compound.filter((compound) => {
-    return !filteredKinds.includes(compound.$kind);
-  });
-
-  return filteredCompounds.map((compound) => {
+  return index.doxygenindex.compound.map((compound) => {
     return new CompoundRef(compound, provider);
   });
 };
