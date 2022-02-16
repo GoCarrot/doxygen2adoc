@@ -8,6 +8,7 @@ import yargs from 'yargs';
 import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 
+// Auto-build the template config options
 const templateNames = [
   'struct', 'class', 'file', 'dir', 'index', 'nav', 'page'
 ];
@@ -19,6 +20,14 @@ const templates = templateNames.reduce((hsh, name) => {
   return hsh;
 }, {});
 
+// Some helpers
+Handlebars.registerHelper('cut', function (string, remove) {
+  return string.replace(remove, '');
+});
+
+//
+// build
+//
 const cmdBuild = (argv) => {
   // Register partial templates
   Object.keys(argv.partial).forEach((key) => {
