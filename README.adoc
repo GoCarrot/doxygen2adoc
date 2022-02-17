@@ -1,0 +1,25 @@
+= doxygen2adoc
+
+Does the thing.
+
+== Errors
+
+If you see:
+
+  Found __deprecated as a parameter declname, check Doxygen config.
+
+Then Doxygen is parsing an Objective C method such as:
+
+  (void)identifyUser:(nonnull NSString*)userId withOptOutList:(nonnull NSArray*)optOut __deprecated;
+
+And treating ``__deprecated`` as the name of the parameter. To fix this, use a
+macro such as:
+
+  (void)identifyUser:(nonnull NSString*)userId withOptOutList:(nonnull NSArray*)optOut __deprecated_msg("Use identifyUser:withConfiguration: instead");
+
+Then add the following to your Doxygen config
+
+  ENABLE_PREPROCESSING   = YES
+  MACRO_EXPANSION        = YES
+  EXPAND_ONLY_PREDEF     = YES
+  PREDEFINED             = __deprecated_msg(x)=
