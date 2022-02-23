@@ -23,11 +23,11 @@ self.build = (inputPath, sourcePath) => {
     attributeNamePrefix: '$',
     stopNodes: ['*.type', '*.xrefdescription'],
     tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
+      // TODO: Here is where we turn the ref into a link to docs for that ref
       if (tagName === 'type') {
         // console.log(`TYPE: ${tagValue}`);
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
         const combinedType = type.reduce((str, elem) => {
-          // TODO: Here is where we turn the ref into a link to docs for that ref
           const typeText = elem.ref ?
             elem.ref[0].$text : elem.$text;
 
