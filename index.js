@@ -35,7 +35,9 @@ self.build = (inputPath, sourcePath) => {
         }, '');
         return combinedType;
       } else if (tagName === 'xrefdescription') {
-        const xrefdescription = tagValueParser.parse(`<xrefdescription>${tagValue}</xrefdescription>`)[0].xrefdescription[0];
+        const xrefdescription =
+          tagValueParser.parse(`<xrefdescription>${tagValue}</xrefdescription>`)[0]
+              .xrefdescription[0];
         const combined = xrefdescription.para.reduce((str, elem) => {
           elem = elem.computeroutput ? elem.computeroutput[0] : elem;
           const text = elem.ref ? elem.ref[0].$text : elem.$text;

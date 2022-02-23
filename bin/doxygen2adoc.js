@@ -10,7 +10,7 @@ import doxygen2adoc from '../index.js';
 
 // Auto-build the template config options
 const templateNames = [
-  'struct', 'class', 'file', 'dir', 'index', 'nav', 'page'
+  'struct', 'class', 'file', 'dir', 'index', 'nav', 'page',
 ];
 
 const templates = templateNames.reduce((hsh, name) => {
@@ -21,7 +21,7 @@ const templates = templateNames.reduce((hsh, name) => {
 }, {});
 
 // Some helpers
-Handlebars.registerHelper('cut', function (string, remove) {
+Handlebars.registerHelper('cut', function(string, remove) {
   return string.replace(remove, '');
 });
 
@@ -118,18 +118,18 @@ yargs(process.argv.slice(2))
       },
       'nav': {
         describe: 'Generate navigation file at the provided path',
-        normalize: true
+        normalize: true,
       },
       'exclude': {
         describe: 'Exclude these kinds of compounds',
         array: true,
-        default: ['file', 'dir']
+        default: ['file', 'dir'],
       },
       'clean': {
         describe: 'Delete contents of output before writing new files.',
         boolean: true,
-        default: false
-      }
+        default: false,
+      },
     }))
     // TODO: quiet option?
     .demandCommand(1, 'Specify at least one command')
