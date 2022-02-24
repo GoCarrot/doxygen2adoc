@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "yarn run eslint *.js ./**/*.js"
+    "lint": "yarn run eslint *.js ./**/*.js ./lib/**/*.js"
   },
   "bin": {
     "doxygen2adoc": "./bin/doxygen2adoc.js"
