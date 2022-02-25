@@ -21,11 +21,15 @@ self.build = (inputPath, sourcePath) => {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: '$',
-    stopNodes: ['*.type', '*.xrefdescription'],
+    stopNodes: ['*.type', '*.briefdescription', '*.detaileddescription'],
     tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
-      // TODO: Here is where we turn the ref into a link to docs for that ref
       if (tagName === 'type') {
-        // console.log(`TYPE: ${tagValue}`);
+        // TODO: We may want to move this, or extract it to something that Documentation
+        //       can share for turning type refs into links.
+        if (jPath !== 'doxygen.compounddef.sectiondef.memberdef.type' &&
+            jPath !== 'doxygen.compounddef.sectiondef.memberdef.param.type') {
+          throw new Error(`Unexpected <type> found at ${jPath}`);
+        }
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
         const combinedType = type.reduce((str, elem) => {
           const typeText = elem.ref ?
@@ -34,17 +38,6 @@ self.build = (inputPath, sourcePath) => {
           return `${str} ${typeText}`;
         }, '');
         return combinedType;
-      } else if (tagName === 'xrefdescription') {
-        const xrefdescription =
-          tagValueParser.parse(`<xrefdescription>${tagValue}</xrefdescription>`)[0]
-              .xrefdescription[0];
-        const combined = xrefdescription.para.reduce((str, elem) => {
-          elem = elem.computeroutput ? elem.computeroutput[0] : elem;
-          const text = elem.ref ? elem.ref[0].$text : elem.$text;
-
-          return `${str} ${text}`;
-        }, '');
-        return combined;
       }
       return undefined;
     },
