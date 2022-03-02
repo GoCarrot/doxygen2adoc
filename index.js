@@ -24,18 +24,25 @@ self.build = (inputPath, sourcePath) => {
     stopNodes: ['*.type', '*.briefdescription', '*.detaileddescription'],
     tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
       if (tagName === 'type') {
-        // TODO: We may want to move this, or extract it to something that Documentation
-        //       can share for turning type refs into links.
         if (jPath !== 'doxygen.compounddef.sectiondef.memberdef.type' &&
             jPath !== 'doxygen.compounddef.sectiondef.memberdef.param.type') {
           throw new Error(`Unexpected <type> found at ${jPath}`);
         }
+
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
         const combinedType = type.reduce((str, elem) => {
-          const typeText = elem.ref ?
-            elem.ref[0].$text : elem.$text;
+          if (elem.ref) {
+            return `${str} ${elem.ref[0].$text}`;
 
-          return `${str} ${typeText}`;
+            // TODO: This is only used inside 'type' tags, and the end result is
+            // that it's only showing up in the 'declaration' on rendered pages.
+            //
+            // The 'declaration' is rendered in a source block, so putting adoc
+            // markup inside that block is not useful.
+            // return `${str} xref:${elem[':@'].$refid}.adoc[${elem.ref[0].$text}]`
+          } else {
+            return `${str} ${elem.$text}`;
+          }
         }, '');
         return combinedType;
       }
