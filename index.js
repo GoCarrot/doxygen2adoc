@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import {strict as assert} from 'assert';
 import {XMLParser} from 'fast-xml-parser';
 
 import CompoundRef from './lib/CompoundRef.js';
@@ -31,17 +32,22 @@ self.build = (inputPath, sourcePath) => {
 
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
         const combinedType = type.reduce((str, elem) => {
+          // Strip out Doxygen including spaces in template types
+          let text = elem.ref ? elem.ref[0].$text : elem.$text;
+          text = text.replaceAll('< ', '<').replaceAll(' >', '>');
+
           if (elem.ref) {
-            return `${str} ${elem.ref[0].$text}`;
+            assert.strictEqual(elem.ref.length, 1, 'More than one ref during type parsing');
+            return `${str} ${text}`;
 
             // TODO: This is only used inside 'type' tags, and the end result is
             // that it's only showing up in the 'declaration' on rendered pages.
             //
             // The 'declaration' is rendered in a source block, so putting adoc
             // markup inside that block is not useful.
-            // return `${str} xref:${elem[':@'].$refid}.adoc[${elem.ref[0].$text}]`
+            // return `${str} xref:${elem[':@'].$refid}.adoc[${text}]`
           } else {
-            return `${str} ${elem.$text}`;
+            return `${str} ${text}`;
           }
         }, '');
         return combinedType;
