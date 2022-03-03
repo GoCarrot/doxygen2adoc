@@ -38,7 +38,12 @@ const cmdBuild = (argv) => {
   const compiledTemplates = templateNames.reduce((hsh, name) => {
     if (!argv.template[name]) return hsh;
 
-    hsh[name] = Handlebars.compile(fs.readFileSync(argv.template[name], 'utf-8'));
+    hsh[name] = (data) => {
+      // Add globals to the template evaluation
+      return Handlebars.compile(
+          fs.readFileSync(argv.template[name], 'utf-8'),
+      )({...argv.global, ...data});
+    };
     return hsh;
   }, {});
 
@@ -129,6 +134,10 @@ yargs(process.argv.slice(2))
         describe: 'Delete contents of output before writing new files.',
         boolean: true,
         default: false,
+      },
+      'global': {
+        describe: 'Global variables provided to Handlebars templates',
+        default: {},
       },
     }))
     // TODO: quiet option?
