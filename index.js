@@ -30,6 +30,10 @@ self.build = (inputPath, sourcePath) => {
           throw new Error(`Unexpected <type> found at ${jPath}`);
         }
 
+        // tagValue = tagValue.replaceAll('&lt; ', '&lt;').replaceAll(' &gt;', '&gt;');
+        const hax = tagValue.includes('Teak.UserData');
+
+
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
         const combinedType = type.reduce((str, elem) => {
           // Strip out Doxygen including spaces in template types
@@ -38,7 +42,7 @@ self.build = (inputPath, sourcePath) => {
 
           if (elem.ref) {
             assert.strictEqual(elem.ref.length, 1, 'More than one ref during type parsing');
-            return `${str} ${text}`;
+            return `${str}${text.endsWith('>') || str.endsWith('<') ? '' : ' '}${text}`.trim();
 
             // TODO: This is only used inside 'type' tags, and the end result is
             // that it's only showing up in the 'declaration' on rendered pages.
@@ -47,7 +51,7 @@ self.build = (inputPath, sourcePath) => {
             // markup inside that block is not useful.
             // return `${str} xref:${elem[':@'].$refid}.adoc[${text}]`
           } else {
-            return `${str} ${text}`;
+            return `${str}${text.endsWith('>') || str.endsWith('<') ? '' : ' '}${text}`.trim();
           }
         }, '');
         return combinedType;
