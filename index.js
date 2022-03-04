@@ -25,17 +25,14 @@ self.build = (inputPath, sourcePath) => {
     stopNodes: ['*.type', '*.briefdescription', '*.detaileddescription'],
     tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
       if (tagName === 'type') {
+        // Sanity check
         if (jPath !== 'doxygen.compounddef.sectiondef.memberdef.type' &&
             jPath !== 'doxygen.compounddef.sectiondef.memberdef.param.type') {
           throw new Error(`Unexpected <type> found at ${jPath}`);
         }
 
-        // tagValue = tagValue.replaceAll('&lt; ', '&lt;').replaceAll(' &gt;', '&gt;');
-        const hax = tagValue.includes('Teak.UserData');
-
-
         const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
-        const combinedType = type.reduce((str, elem) => {
+        return type.reduce((str, elem) => {
           // Strip out Doxygen including spaces in template types
           let text = elem.ref ? elem.ref[0].$text : elem.$text;
           text = text.replaceAll('< ', '<').replaceAll(' >', '>');
@@ -54,7 +51,6 @@ self.build = (inputPath, sourcePath) => {
             return `${str}${text.endsWith('>') || str.endsWith('<') ? '' : ' '}${text}`.trim();
           }
         }, '');
-        return combinedType;
       }
       return undefined;
     },
