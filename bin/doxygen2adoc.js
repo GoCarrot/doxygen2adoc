@@ -29,8 +29,9 @@ Handlebars.registerHelper('cut', function(string, remove) {
 //
 const cmdBuild = (argv) => {
   // Register partial templates
-  Object.keys(argv.partial).forEach((key) => {
-    Handlebars.registerPartial(key, fs.readFileSync(argv.partial[key], 'utf-8'));
+  const partials = {...doxygen2adoc.partials, ...argv.partial};
+  Object.keys(partials).forEach((key) => {
+    Handlebars.registerPartial(key, fs.readFileSync(partials[key], 'utf-8'));
   });
 
   // Compile the templates
@@ -151,12 +152,10 @@ yargs(process.argv.slice(2))
       'header': {
         describe: 'Header which will be prepended to all Handlebars templates',
         normalize: true,
-        default: doxygen2adoc.header,
       },
       'footer': {
         describe: 'Footer which will be prepended to all Handlebars templates',
         normalize: true,
-        default: doxygen2adoc.footer,
       },
     }))
     // TODO: quiet option?

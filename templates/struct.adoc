@@ -1,5 +1,4 @@
-[#{{id}}]
-= {struct-name}
+{{> structTitle}}
 
 {{#if inheritsFrom}}
 {{name}} +

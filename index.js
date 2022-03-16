@@ -22,8 +22,11 @@ self.templates = {
   page: null,
 };
 
-self.header = path.join(__dirname, '/templates/header.adoc');
-self.footer = path.join(__dirname, '/templates/footer.adoc');
+self.partials = {
+  function: path.join(__dirname, '/templates/partial/function.adoc'),
+  functionTitle: path.join(__dirname, '/templates/partial/functionTitle.adoc'),
+  structTitle: path.join(__dirname, '/templates/partial/structTitle.adoc'),
+};
 
 self.build = (inputPath, sourcePath) => {
   const refMapping = {};
