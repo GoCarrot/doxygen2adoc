@@ -9,19 +9,18 @@ import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 
 // Auto-build the template config options
-const templateNames = [
-  'struct', 'class', 'file', 'dir', 'index', 'nav', 'page',
-];
-
-const templates = templateNames.reduce((hsh, name) => {
+const templates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
   hsh[`template.${name}`] = {
     normalize: true,
+    default: doxygen2adoc.templates[name]
   };
   return hsh;
 }, {});
 
 // Some helpers
 Handlebars.registerHelper('cut', function(string, remove) {
+  if (!string) return string;
+
   return string.replace(remove, '');
 });
 
@@ -35,13 +34,23 @@ const cmdBuild = (argv) => {
   });
 
   // Compile the templates
-  const compiledTemplates = templateNames.reduce((hsh, name) => {
+  const header = argv.header ? fs.readFileSync(argv.header, 'utf-8') : null;
+  const footer = argv.footer ? fs.readFileSync(argv.footer, 'utf-8') : null;
+
+  const compiledTemplates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
     if (!argv.template[name]) return hsh;
 
     hsh[name] = (data) => {
+      // Add header/footer if applicable
+      const template = fs.readFileSync(argv.template[name], 'utf-8');
+      const templateContents = [];
+      if (header) templateContents.push(header);
+      templateContents.push(template);
+      if (footer) templateContents.push(footer);
+
       // Add globals to the template evaluation
       return Handlebars.compile(
-          fs.readFileSync(argv.template[name], 'utf-8'),
+          templateContents.join('\n'),
       )({...argv.global, ...data});
     };
     return hsh;
@@ -138,6 +147,16 @@ yargs(process.argv.slice(2))
       'global': {
         describe: 'Global variables provided to Handlebars templates',
         default: {},
+      },
+      'header': {
+        describe: 'Header which will be prepended to all Handlebars templates',
+        normalize: true,
+        default: doxygen2adoc.header,
+      },
+      'footer': {
+        describe: 'Footer which will be prepended to all Handlebars templates',
+        normalize: true,
+        default: doxygen2adoc.footer,
       },
     }))
     // TODO: quiet option?

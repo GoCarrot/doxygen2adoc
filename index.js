@@ -9,6 +9,22 @@ import CompoundRef from './lib/CompoundRef.js';
 
 const self = {};
 
+const __dirname = new URL('.', import.meta.url).pathname;
+
+// Defaults for templates
+self.templates = {
+  struct: path.join(__dirname, '/templates/struct.adoc'),
+  class: path.join(__dirname, '/templates/struct.adoc'),
+  file: null,
+  dir: null,
+  index: null,
+  nav: null,
+  page: null,
+};
+
+self.header = path.join(__dirname, '/templates/header.adoc');
+self.footer = path.join(__dirname, '/templates/footer.adoc');
+
 self.build = (inputPath, sourcePath) => {
   const refMapping = {};
 

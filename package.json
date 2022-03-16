@@ -8,6 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "yarn run eslint *.js ./**/*.js ./lib/**/*.js"
   },
+  "files": [
+    "bin/*",
+    "lib/**/*",
+    "templates/*"
+  ],
   "bin": {
     "doxygen2adoc": "./bin/doxygen2adoc.js"
   },
