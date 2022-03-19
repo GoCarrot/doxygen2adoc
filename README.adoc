@@ -1,6 +1,17 @@
 = doxygen2adoc
 
-Does the thing.
+Does what it says on the tin.
+
+== Examples
+Some examples of multi-language usage from our SDKs at https://teak.io[Teak].
+Each SDK builds its docs using doxygen and doxygen2adoc in various languages using
+configurations and appropriate partial templates.
+
+* https://github.com/GoCarrot/teak-ios/tree/pw/doxygen[teak-ios] Objective C
+* https://github.com/GoCarrot/teak-android/tree/pw/doxygen[teak-android] Java
+* https://github.com/GoCarrot/teak-unity/tree/pw/doxygen[teak-unity] C#
+
+The generated docs can be found at: http://docs.gocarrot-dev.com
 
 == Errors
 

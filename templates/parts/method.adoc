@@ -1,41 +1,20 @@
-{{> functionTitle}}
-
-{{#if deprecated}}
-[CAUTION]
-====
-{{{deprecatedDocs}}}
-====
-{{/if}}
-
+ifdef::part_brief[]
 {{{brief}}}
+endif::[]
 
+ifdef::part_decl[]
 [subs=+attributes]
 ++++
 <pre class="highlightjs highlight"><code class="language-{{@root.sourceLanguage}} hljs" data-lang="{{@root.sourceLanguage}}">{{{declaration}}}</code></pre>
 ++++
+endif::[]
 
-{{#if return.description}}==== Return
-{{{return.description}}}{{/if}}
-
+ifdef::part_description[]
 {{{description}}}
+endif::[]
 
-{{#each note}}
-[NOTE]
-====
-{{{this}}}
-====
-{{/each}}
-
-{{#each warning}}
-[WARNING]
-====
-{{{this}}}
-====
-{{/each}}
-
+ifdef::part_params[]
 {{#if params}}
-==== Parameters
-
 [cols="1,3a", stripes="even"]
 |===
 |Name |Description
@@ -46,3 +25,6 @@
 {{/each}}
 |===
 {{/if}}
+endif::[]
+
+(xref:{{{@root.antora.name}}}:{{{@root.antora.module}}}:{{{parent.id}}}.adoc#{{{id}}}[Documentation])

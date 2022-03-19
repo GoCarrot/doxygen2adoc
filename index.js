@@ -11,10 +11,14 @@ const self = {};
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
+const _ = (template) => {
+  return path.join(__dirname, '/templates/', template);
+};
+
 // Defaults for templates
 self.templates = {
-  struct: path.join(__dirname, '/templates/struct.adoc'),
-  class: path.join(__dirname, '/templates/struct.adoc'),
+  struct: _('struct.adoc'),
+  class: _('struct.adoc'),
   file: null,
   dir: null,
   index: null,
@@ -22,12 +26,27 @@ self.templates = {
   page: null,
 };
 
+// Built in partial templates
 self.partials = {
-  function: path.join(__dirname, '/templates/partial/function.adoc'),
-  functionTitle: path.join(__dirname, '/templates/partial/functionTitle.adoc'),
-  structTitle: path.join(__dirname, '/templates/partial/structTitle.adoc'),
+  function: _('partial/function.adoc'),
+  functionTitle: _('partial/functionTitle.adoc'),
+  structTitle: _('partial/structTitle.adoc'),
 };
 
+// Built in partial output templates
+self.parts = {
+  methods: _('parts/method.adoc'),
+  staticMethods: _('parts/method.adoc'),
+};
+
+// Antora configuration
+self.antora = {
+  module: 'ROOT',
+  name: null,
+  version: null,
+};
+
+// Build command
 self.build = (inputPath, sourcePath) => {
   const refMapping = {};
 
@@ -83,8 +102,8 @@ self.build = (inputPath, sourcePath) => {
             const refId = elem[':@'].$refid;
             const refSource = refMapping[refId];
             const refText = refSource ?
-              `<a href="${refSource}.html#${refId}">${text}</a>` :
-              `<a href="${refId}.html">${text}</a>`;
+              `<a href="/${self.antora.name}/${self.antora.version}/${refSource}.html#${refId}">${text}</a>` :
+              `<a href="/${self.antora.name}/${self.antora.version}/${refId}.html">${text}</a>`;
 
             return `${str}${text.endsWith('&gt;') || str.endsWith('&lt;') ? '' : ' '}${refText}`.trim();
           } else {

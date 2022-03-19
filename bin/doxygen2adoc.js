@@ -12,7 +12,7 @@ import doxygen2adoc from '../index.js';
 const templates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
   hsh[`template.${name}`] = {
     normalize: true,
-    default: doxygen2adoc.templates[name]
+    default: doxygen2adoc.templates[name],
   };
   return hsh;
 }, {});
@@ -28,6 +28,12 @@ Handlebars.registerHelper('cut', function(string, remove) {
 // build
 //
 const cmdBuild = (argv) => {
+  // Merge antora configuration
+  if (argv.antora) {
+    const antoraYml = YAML.parse(fs.readFileSync(argv.antora, 'utf-8'));
+    doxygen2adoc.antora = {...doxygen2adoc.antora, ...antoraYml};
+  }
+
   // Register partial templates
   const partials = {...doxygen2adoc.partials, ...argv.partial};
   Object.keys(partials).forEach((key) => {
@@ -38,6 +44,7 @@ const cmdBuild = (argv) => {
   const header = argv.header ? fs.readFileSync(argv.header, 'utf-8') : null;
   const footer = argv.footer ? fs.readFileSync(argv.footer, 'utf-8') : null;
 
+  // Compile output templates
   const compiledTemplates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
     if (!argv.template[name]) return hsh;
 
@@ -52,7 +59,20 @@ const cmdBuild = (argv) => {
       // Add globals to the template evaluation
       return Handlebars.compile(
           templateContents.join('\n'),
-      )({...argv.global, ...data});
+      )({...argv.global, ...{antora: doxygen2adoc.antora}, ...data});
+    };
+    return hsh;
+  }, {});
+
+  // Compile part templates
+  const compiledPartTemplates = Object.keys(argv.parts).reduce((hsh, name) => {
+    hsh[name] = (data) => {
+      const fileName = (!argv.parts[name] || argv.parts[name] === '~') ?
+        doxygen2adoc.parts[name] : argv.parts[name];
+      const template = fs.readFileSync(fileName, 'utf-8');
+
+      // Add globals to the template evaluation
+      return Handlebars.compile(template)({...argv.global, ...{antora: doxygen2adoc.antora}, ...data});
     };
     return hsh;
   }, {});
@@ -77,10 +97,23 @@ const cmdBuild = (argv) => {
   // Write out componds
   filteredRefs.forEach((compoundRef) => {
     if (compiledTemplates[compoundRef.kind]) {
-      fs.writeFileSync(`${argv.output}/${compoundRef.refId}.adoc`,
+      fs.writeFileSync(path.join(argv.output, `${compoundRef.refId}.adoc`),
           compiledTemplates[compoundRef.kind](compoundRef.compound));
     } else {
       console.error(`Missing template for ${compoundRef.kind}`);
+    }
+
+    // Write out parts for each Compound
+    for (const part in argv.parts) {
+      if (compoundRef.compound[part]) {
+        const srcPart = Array.isArray(compoundRef.compound[part]) ?
+          compoundRef.compound[part] : [compoundRef.compound[part]];
+
+        srcPart.forEach((src) => {
+          fs.writeFileSync(path.join(argv.output, `${compoundRef.compound.name}_${src.partName}.adoc`),
+              compiledPartTemplates[part](src));
+        });
+      }
     }
   });
 
@@ -90,7 +123,7 @@ const cmdBuild = (argv) => {
   }, []);
 
   if (compiledTemplates['index']) {
-    fs.writeFileSync(`${argv.output}/index.adoc`, compiledTemplates['index']({items: compounds}));
+    fs.writeFileSync(path.join(argv.output, 'index.adoc'), compiledTemplates['index']({items: compounds}));
   }
 
   if (compiledTemplates['nav']) {
@@ -155,6 +188,14 @@ yargs(process.argv.slice(2))
       },
       'footer': {
         describe: 'Footer which will be prepended to all Handlebars templates',
+        normalize: true,
+      },
+      'parts': {
+        describe: 'Write out partial templates for the specified Compound parts',
+        default: {},
+      },
+      'antora': {
+        describe: 'Path to antora.yml',
         normalize: true,
       },
     }))
