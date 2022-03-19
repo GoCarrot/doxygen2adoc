@@ -22,9 +22,9 @@
 {{#each attributes}}
 |[[{{id}}]]``{{name}}``
 
-[subs=+attributes]
-|++++
-<pre class="highlightjs"><code class="language-{{@root.sourceLanguage}} hljs" data-lang="{{@root.sourceLanguage}}">{{{return.type}}}</code></pre>
+|[subs=+attributes]
+++++
+<pre class="highlightjs"><code class="language-{source-language} hljs" data-lang="{source-language}">{{{return.type}}}</code></pre>
 ++++
 
 |{{{brief}}}
@@ -40,9 +40,10 @@
 {{#each staticAttributes}}
 |[[{{id}}]]``{{name}}``
 
-[subs=+attributes]
-|++++
-<pre class="highlightjs"><code class="language-{{@root.sourceLanguage}} hljs" data-lang="{{@root.sourceLanguage}}">{{{return.type}}}</code></pre>
+
+|[subs=+attributes]
+++++
+<pre class="highlightjs"><code class="language-{source-language} hljs" data-lang="{source-language}">{{{return.type}}}</code></pre>
 ++++
 
 |{{{brief}}}
@@ -68,9 +69,10 @@
 {{#each properties}}
 |[[{{id}}]]``{{name}}``
 
-[subs=+attributes]
-|++++
-<pre class="highlightjs"><code class="language-{{@root.sourceLanguage}} hljs" data-lang="{{@root.sourceLanguage}}">{{{return.type}}}</code></pre>
+
+|[subs=+attributes]
+++++
+<pre class="highlightjs"><code class="language-{source-language} hljs" data-lang="{source-language}">{{{return.type}}}</code></pre>
 ++++
 
 |{{{brief}}}
