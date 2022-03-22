@@ -1,0 +1,53 @@
+{{#*inline "change"}}
+{{#if (isObject this)}}
+{{#each this}}
+* {{@key}}
+{{> change}}
+{{/each}}
+{{else if (isArray this)}}
+{{#each this}}
+*{{> change}}
+{{/each}}
+{{else}}
+* {{{this}}}
+{{/if}}
+{{/inline}}
+
+= {{version}}
+
+{{#if breaking}}
+== Breaking Changes
+{{#each breaking}}
+{{> change}}
+{{/each}}
+{{/if}}
+
+{{#if new}}
+== New Features
+{{#each new}}
+{{> change}}
+{{/each}}
+{{/if}}
+
+{{#if bug}}
+== Bug Fixes
+{{#each bug}}
+{{> change}}
+{{/each}}
+{{/if}}
+
+{{#if ios}}
+.iOS Version {{ios}}
+[%collapsible]
+====
+include::ios-api:changelog:partial${{ios}}.adoc[leveloffset=+1]
+====
+{{/if}}
+
+{{#if android}}
+.Android Version {{android}}
+[%collapsible]
+====
+include::android-api:changelog:partial${{android}}.adoc[leveloffset=+1]
+====
+{{/if}}

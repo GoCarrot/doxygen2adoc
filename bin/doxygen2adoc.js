@@ -7,6 +7,7 @@ import YAML from 'yaml';
 import yargs from 'yargs';
 import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
+import compareVersions from 'compare-versions';
 
 // Auto-build the template config options
 const templates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
@@ -21,13 +22,22 @@ const templates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
 Handlebars.registerHelper('cut', function(string, remove) {
   if (!string) return string;
 
-  return string.replace(remove, '');
+  return new Handlebars.SafeString(string.replace(remove, ''));
+});
+
+Handlebars.registerHelper('isObject', function(test) {
+  if (!test) return false;
+  return test.toString() === '[object Object]';
+});
+
+Handlebars.registerHelper('isArray', function(test) {
+  return Array.isArray(test);
 });
 
 //
-// build
+// Process config
 //
-const cmdBuild = (argv) => {
+const processArgs = (argv) => {
   // Merge antora configuration
   if (argv.antora) {
     const antoraYml = YAML.parse(fs.readFileSync(argv.antora, 'utf-8'));
@@ -64,6 +74,30 @@ const cmdBuild = (argv) => {
     return hsh;
   }, {});
 
+  return compiledTemplates;
+};
+
+//
+// clean
+//
+const cmdClean = (argv) => {
+  // Clean output directory
+  if (argv.clean) {
+    const files = fs.readdirSync(argv.output);
+    for (const file of files) {
+      if (file.endsWith('.adoc')) {
+        fs.unlinkSync(path.join(argv.output, file));
+      }
+    }
+  }
+};
+
+//
+// build
+//
+const cmdBuild = (argv) => {
+  const compiledTemplates = processArgs(argv);
+
   // Compile part templates
   const compiledPartTemplates = Object.keys(argv.parts).reduce((hsh, name) => {
     hsh[name] = (data) => {
@@ -72,7 +106,11 @@ const cmdBuild = (argv) => {
       const template = fs.readFileSync(fileName, 'utf-8');
 
       // Add globals to the template evaluation
-      return Handlebars.compile(template)({...argv.global, ...{antora: doxygen2adoc.antora}, ...data});
+      return Handlebars.compile(template)({
+        ...argv.global,
+        ...{antora: doxygen2adoc.antora},
+        ...data,
+      });
     };
     return hsh;
   }, {});
@@ -84,15 +122,8 @@ const cmdBuild = (argv) => {
     return !argv.exclude.includes(compound.kind);
   });
 
-  // Clean output directory
-  if (argv.clean) {
-    const files = fs.readdirSync(argv.output);
-    for (const file of files) {
-      if (file.endsWith('.adoc')) {
-        fs.unlinkSync(path.join(argv.output, file));
-      }
-    }
-  }
+  // Clean if needed
+  cmdClean(argv);
 
   // Write out componds
   filteredRefs.forEach((compoundRef) => {
@@ -110,7 +141,8 @@ const cmdBuild = (argv) => {
           compoundRef.compound[part] : [compoundRef.compound[part]];
 
         srcPart.forEach((src) => {
-          fs.writeFileSync(path.join(argv.output, `${compoundRef.compound.name}_${src.partName}.adoc`),
+          fs.writeFileSync(
+              path.join(argv.output, `${compoundRef.compound.name}_${src.partName}.adoc`),
               compiledPartTemplates[part](src));
         });
       }
@@ -123,7 +155,9 @@ const cmdBuild = (argv) => {
   }, []);
 
   if (compiledTemplates['index']) {
-    fs.writeFileSync(path.join(argv.output, 'index.adoc'), compiledTemplates['index']({items: compounds}));
+    fs.writeFileSync(
+        path.join(argv.output, 'index.adoc'),
+        compiledTemplates['index']({items: compounds}));
   }
 
   if (compiledTemplates['nav']) {
@@ -131,6 +165,48 @@ const cmdBuild = (argv) => {
   }
 };
 
+//
+// changelog
+//
+const cmdChangelog = (argv) => {
+  const compiledTemplates = processArgs(argv);
+
+  // Build input
+  const input = {};
+  const inputDir = fs.readdirSync(argv.input);
+  for (const file of inputDir) {
+    if (file.endsWith('.yml') || file.endsWith('.yaml')) {
+      const src = fs.readFileSync(path.join(argv.input, file), 'utf-8');
+      input[path.parse(file).name] = YAML.parse(src);
+    }
+  }
+
+  // Sorted version list
+  const inputVersions = Object.keys(input).sort(compareVersions).reverse();
+
+  // Clean if needed
+  cmdClean(argv);
+
+  // Write out
+  inputVersions.forEach((version) => {
+    const src = {...input[version], ...{
+      version: version,
+      ios: input[version].ios === null ? version : input[version].ios,
+      android: input[version].android === null ? version : input[version].android,
+    }};
+
+    fs.writeFileSync(path.join(argv.output, `${version}.adoc`),
+        compiledTemplates.version(src));
+  });
+
+  if (compiledTemplates['changelog']) {
+    fs.writeFileSync(argv.nav, compiledTemplates['changelog'](inputVersions));
+  }
+};
+
+//
+// Command line options
+//
 yargs(process.argv.slice(2))
     .config('config', 'Configuration JSON or YAML file', function(configPath) {
       if (configPath.endsWith('yml') || configPath.endsWith('yaml')) {
@@ -142,6 +218,9 @@ yargs(process.argv.slice(2))
     .command('build', 'Build the docs', (yargs) => {
       return yargs;
     }, cmdBuild)
+    .command('changelog', 'Build a changelog from YAML version files', (yargs) => {
+      return yargs;
+    }, cmdChangelog)
     .options(Object.assign(templates, {
       'input': {
         alias: 'i',

@@ -1,0 +1,4 @@
+= Changelog
+{{#each this}}
+include::partial${{this}}.adoc[leveloffset=+1]
+{{/each}}

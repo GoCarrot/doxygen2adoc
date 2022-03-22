@@ -24,6 +24,8 @@ self.templates = {
   index: null,
   nav: null,
   page: null,
+  version: _('version.adoc'),
+  changelog: _('changelog.adoc'),
 };
 
 // Built in partial templates
