@@ -173,10 +173,10 @@ const cmdChangelog = (argv) => {
 
   // Build input
   const input = {};
-  const inputDir = fs.readdirSync(argv.input);
+  const inputDir = fs.readdirSync(argv.changelog.input);
   for (const file of inputDir) {
     if (file.endsWith('.yml') || file.endsWith('.yaml')) {
-      const src = fs.readFileSync(path.join(argv.input, file), 'utf-8');
+      const src = fs.readFileSync(path.join(argv.changelog.input, file), 'utf-8');
       input[path.parse(file).name] = YAML.parse(src);
     }
   }
@@ -195,12 +195,12 @@ const cmdChangelog = (argv) => {
       android: input[version].android === null ? version : input[version].android,
     }};
 
-    fs.writeFileSync(path.join(argv.output, `${version}.adoc`),
+    fs.writeFileSync(path.join(argv.changelog.output, `${version}.adoc`),
         compiledTemplates.version(src));
   });
 
-  if (compiledTemplates['changelog']) {
-    fs.writeFileSync(argv.nav, compiledTemplates['changelog']({versions: inputVersions}));
+  if (argv.changelog && argv.changelog.index && compiledTemplates['changelog']) {
+    fs.writeFileSync(argv.changelog.index, compiledTemplates['changelog']({versions: inputVersions}));
   }
 };
 
@@ -277,6 +277,18 @@ yargs(process.argv.slice(2))
         describe: 'Path to antora.yml',
         normalize: true,
       },
+      'changelog.input': {
+        describe: 'Location path for changelog versions, in YAML format',
+        normalize: true,
+      },
+      'changelog.output': {
+        describe: 'Destination path for changelog versions',
+        normalize: true,
+      },
+      'changelog.index': {
+        describe: 'Destination path for combined changelog',
+        normalize: true,
+      }
     }))
     // TODO: quiet option?
     .demandCommand(1, 'Specify at least one command')
