@@ -200,7 +200,7 @@ const cmdChangelog = (argv) => {
   });
 
   if (compiledTemplates['changelog']) {
-    fs.writeFileSync(argv.nav, compiledTemplates['changelog'](inputVersions));
+    fs.writeFileSync(argv.nav, compiledTemplates['changelog']({versions: inputVersions}));
   }
 };
 

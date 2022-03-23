@@ -1,7 +1,7 @@
 {{#*inline "change"}}
 {{#if (isObject this)}}
 {{#each this}}
-* {{@key}}
+* {{{@key}}}
 {{> change}}
 {{/each}}
 {{else if (isArray this)}}
@@ -13,7 +13,12 @@
 {{/if}}
 {{/inline}}
 
+ifdef::version-title[]
+= {version-title}
+endif::[]
+ifndef::version-title[]
 = {{version}}
+endif::[]
 
 {{#if breaking}}
 == Breaking Changes
@@ -37,17 +42,13 @@
 {{/if}}
 
 {{#if ios}}
-.iOS Version {{ios}}
-[%collapsible]
-====
+:version-title: iOS
 include::ios-api:changelog:partial${{ios}}.adoc[leveloffset=+1]
-====
 {{/if}}
 
 {{#if android}}
-.Android Version {{android}}
-[%collapsible]
-====
+:version-title: Android
 include::android-api:changelog:partial${{android}}.adoc[leveloffset=+1]
-====
 {{/if}}
+
+:version-title!:
