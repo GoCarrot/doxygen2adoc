@@ -48,9 +48,40 @@ self.antora = {
   version: null,
 };
 
+self.formatName = (name, language) => {
+  return name.replace(/::/g, '.');
+};
+
+self.refMap = (inputPath) => {
+  const refMapping = {};
+
+  const firstPassXml = (name) => {
+    // Undecorated parser
+    const firstPass = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '$',
+    });
+
+    const file = path.join(inputPath, `${name}.xml`);
+    console.log(`Reading file ${file}`); // TODO: Verbose
+    return firstPass.parse(fs.readFileSync(file, 'utf8'));
+  };
+
+  firstPassXml('index').doxygenindex.compound.forEach((compound) => {
+    if (compound.member) {
+      const members = Array.isArray(compound.member) ? compound.member : [compound.member];
+      members.forEach((member) => {
+        refMapping[member.$refid] = compound.$refid;
+      });
+    }
+  });
+
+  return refMapping;
+};
+
 // Build command
 self.build = (inputPath, sourcePath) => {
-  const refMapping = {};
+  const refMapping = self.refMap(inputPath);
 
   // Parse tag values which contain order-dependent XML
   const tagValueParser = new XMLParser({
@@ -58,12 +89,6 @@ self.build = (inputPath, sourcePath) => {
     attributeNamePrefix: '$',
     textNodeName: '$text',
     preserveOrder: true,
-  });
-
-  // Undecorated parser
-  const firstPass = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: '$',
   });
 
   // XML Parser for general use
@@ -133,23 +158,7 @@ self.build = (inputPath, sourcePath) => {
       console.log(`Reading file ${file}`); // TODO: Verbose
       return parser.parse(fs.readFileSync(file, 'utf8'));
     },
-
-    firstPassXml: (name) => {
-      const file = path.join(inputPath, `${name}.xml`);
-      console.log(`Reading file ${file}`); // TODO: Verbose
-      return firstPass.parse(fs.readFileSync(file, 'utf8'));
-    },
   };
-
-  // Do a first-pass parse and build reference mapping as needed
-  provider.firstPassXml('index').doxygenindex.compound.forEach((compound) => {
-    if (compound.member) {
-      const members = Array.isArray(compound.member) ? compound.member : [compound.member];
-      members.forEach((member) => {
-        refMapping[member.$refid] = compound.$refid;
-      });
-    }
-  });
 
   // Read the index, create compound refs and return them
   const index = provider.xml('index');

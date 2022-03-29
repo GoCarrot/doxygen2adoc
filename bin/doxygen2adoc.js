@@ -163,6 +163,35 @@ const cmdBuild = (argv) => {
   if (compiledTemplates['nav']) {
     fs.writeFileSync(argv.nav, compiledTemplates['nav']({items: compounds}));
   }
+
+  // Write out symbol map
+  if (argv.symbolMap) {
+    const symbolMap = compounds.reduce((hsh, compound) => {
+      // Add the compound itself
+      hsh[compound.symbolName] = {
+        source: compound.id,
+        target: null,
+      };
+
+      // Add the symbols in the compound
+      for (const [key, value] of Object.entries(compound.symbols)) {
+        if (hsh[key]) {
+          throw new Error(`Duplicate symbol name ${key}`);
+        }
+        hsh[key] = {
+          source: compound.id,
+          target: value,
+        };
+      }
+      return hsh;
+    }, {});
+
+    const mapFileContents = {
+      antora: doxygen2adoc.antora,
+      symbols: symbolMap,
+    };
+    fs.writeFileSync(argv.symbolMap, JSON.stringify(mapFileContents));
+  }
 };
 
 //
@@ -288,7 +317,11 @@ yargs(process.argv.slice(2))
       'changelog.index': {
         describe: 'Destination path for combined changelog',
         normalize: true,
-      }
+      },
+      'symbolMap': {
+        describe: 'Destination path for symbol map JSON',
+        normalize: true,
+      },
     }))
     // TODO: quiet option?
     .demandCommand(1, 'Specify at least one command')
