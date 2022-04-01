@@ -126,6 +126,7 @@ const cmdBuild = (argv) => {
   cmdClean(argv);
 
   // Write out componds
+  const partMap = {};
   filteredRefs.forEach((compoundRef) => {
     if (compiledTemplates[compoundRef.kind]) {
       fs.writeFileSync(path.join(argv.output, `${compoundRef.refId}.adoc`),
@@ -141,8 +142,9 @@ const cmdBuild = (argv) => {
           compoundRef.compound[part] : [compoundRef.compound[part]];
 
         srcPart.forEach((src) => {
+          partMap[src.id] = `${compoundRef.compound.name}_${src.partName}.adoc`;
           fs.writeFileSync(
-              path.join(argv.output, `${compoundRef.compound.name}_${src.partName}.adoc`),
+              path.join(argv.output, partMap[src.id]),
               compiledPartTemplates[part](src));
         });
       }
@@ -178,9 +180,12 @@ const cmdBuild = (argv) => {
         if (hsh[key]) {
           throw new Error(`Duplicate symbol name ${key}`);
         }
+
         hsh[key] = {
           source: compound.id,
           target: value,
+          part: partMap[value],
+          language: compound.language,
         };
       }
       return hsh;
