@@ -7,7 +7,7 @@ import YAML from 'yaml';
 import yargs from 'yargs';
 import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
-import compareVersions from 'compare-versions';
+import commands from './lib/commands.js';
 
 // Auto-build the template config options
 const templates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
@@ -166,36 +166,14 @@ const cmdBuild = (argv) => {
     fs.writeFileSync(argv.nav, compiledTemplates['nav']({items: compounds}));
   }
 
+  // Write out changelog
+  if (argv.changelog) {
+    commands.changelog(argv, compiledTemplates);
+  }
+
   // Write out symbol map
   if (argv.symbolMap) {
-    const symbolMap = compounds.reduce((hsh, compound) => {
-      // Add the compound itself
-      hsh[compound.symbolName] = {
-        source: compound.id,
-        target: null,
-      };
-
-      // Add the symbols in the compound
-      for (const [key, value] of Object.entries(compound.symbols)) {
-        if (hsh[key]) {
-          throw new Error(`Duplicate symbol name ${key}`);
-        }
-
-        hsh[key] = {
-          source: compound.id,
-          target: value,
-          part: partMap[value],
-          language: compound.language,
-        };
-      }
-      return hsh;
-    }, {});
-
-    const mapFileContents = {
-      antora: doxygen2adoc.antora,
-      symbols: symbolMap,
-    };
-    fs.writeFileSync(argv.symbolMap, JSON.stringify(mapFileContents));
+    commands.symbolMap(argv, compounds, partMap);
   }
 };
 
@@ -204,38 +182,9 @@ const cmdBuild = (argv) => {
 //
 const cmdChangelog = (argv) => {
   const compiledTemplates = processArgs(argv);
-
-  // Build input
-  const input = {};
-  const inputDir = fs.readdirSync(argv.changelog.input);
-  for (const file of inputDir) {
-    if (file.endsWith('.yml') || file.endsWith('.yaml')) {
-      const src = fs.readFileSync(path.join(argv.changelog.input, file), 'utf-8');
-      input[path.parse(file).name] = YAML.parse(src);
-    }
-  }
-
-  // Sorted version list
-  const inputVersions = Object.keys(input).sort(compareVersions).reverse();
-
-  // Clean if needed
   cmdClean(argv);
 
-  // Write out
-  inputVersions.forEach((version) => {
-    const src = {...input[version], ...{
-      version: version,
-      ios: input[version].ios === null ? version : input[version].ios,
-      android: input[version].android === null ? version : input[version].android,
-    }};
-
-    fs.writeFileSync(path.join(argv.changelog.output, `${version}.adoc`),
-        compiledTemplates.version(src));
-  });
-
-  if (argv.changelog && argv.changelog.index && compiledTemplates['changelog']) {
-    fs.writeFileSync(argv.changelog.index, compiledTemplates['changelog']({versions: inputVersions}));
-  }
+  commands.changelog(argv, compiledTemplates);
 };
 
 //

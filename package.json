@@ -9,7 +9,7 @@
     "lint": "yarn run eslint *.js ./**/*.js ./lib/**/*.js"
   },
   "files": [
-    "bin/*",
+    "bin/**/*",
     "lib/**/*",
     "templates/*"
   ],
