@@ -27,4 +27,4 @@ ifdef::part_params[]
 {{/if}}
 endif::[]
 
-(xref:{{{@root.antora.name}}}:{{{@root.antora.module}}}:{{{parent.id}}}.adoc#{{{id}}}[Documentation])
+(xref:{{{@root.antora.name}}}:{{{@root.antora.module}}}:{{{parent.id}}}.adoc#{{{id}}}[Documentation, window=_blank])
