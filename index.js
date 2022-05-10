@@ -43,7 +43,7 @@ self.parts = {
 
 // Antora configuration
 self.antora = {
-  module: 'ROOT',
+  module: 'api',
   name: null,
   version: null,
 };
