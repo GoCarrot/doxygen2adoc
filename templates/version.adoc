@@ -43,12 +43,12 @@ endif::[]
 
 {{#if ios}}
 :version-title: iOS
-include::ios-api:changelog:partial${{ios}}.adoc[leveloffset=+1]
+include::ios:changelog:partial${{ios}}.adoc[leveloffset=+1]
 {{/if}}
 
 {{#if android}}
 :version-title: Android
-include::android-api:changelog:partial${{android}}.adoc[leveloffset=+1]
+include::android:changelog:partial${{android}}.adoc[leveloffset=+1]
 {{/if}}
 
 :version-title!:
