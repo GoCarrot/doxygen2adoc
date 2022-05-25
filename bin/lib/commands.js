@@ -14,7 +14,8 @@ self.changelog = (argv, compiledTemplates) => {
   const input = {};
   const inputDir = fs.readdirSync(argv.changelog.input);
   for (const file of inputDir) {
-    if (file.endsWith('.yml') || file.endsWith('.yaml')) {
+    if (!file.startsWith('.') &&
+        (file.endsWith('.yml') || file.endsWith('.yaml'))) {
       const src = fs.readFileSync(path.join(argv.changelog.input, file), 'utf-8');
       input[path.parse(file).name] = YAML.parse(src);
     }
