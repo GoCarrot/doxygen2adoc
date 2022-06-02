@@ -43,7 +43,7 @@ self.parts = {
 
 // Antora configuration
 self.antora = {
-  module: 'api',
+  module: null,
   name: null,
   version: null,
 };
@@ -128,9 +128,11 @@ self.build = (inputPath, sourcePath) => {
             //       thing that knows about anything template related.
             const refId = elem[':@'].$refid;
             const refSource = refMapping[refId];
+            const version = 'latest' || self.antora.version; // Hax, not sure what to do about this
+            const module = self.antora.module ? `/${self.antora.module}` : '';
             const refText = refSource ?
-              `<a href="/${self.antora.name}/${self.antora.version}/${refSource}.html#${refId}">${text}</a>` :
-              `<a href="/${self.antora.name}/${self.antora.version}/${refId}.html">${text}</a>`;
+              `<a href="/${self.antora.name}/${version}${module}/${refSource}.html#${refId}">${text}</a>` :
+              `<a href="/${self.antora.name}/${version}${module}/${refId}.html">${text}</a>`;
 
             return `${str}${text.endsWith('&gt;') || str.endsWith('&lt;') ? '' : ' '}${refText}`.trim();
           } else {

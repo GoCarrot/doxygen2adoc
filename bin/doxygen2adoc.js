@@ -39,9 +39,12 @@ Handlebars.registerHelper('isArray', function(test) {
 //
 const processArgs = (argv) => {
   // Merge antora configuration
+  let antoraYml = {};
   if (argv.antora) {
-    const antoraYml = YAML.parse(fs.readFileSync(argv.antora, 'utf-8'));
-    doxygen2adoc.antora = {...doxygen2adoc.antora, ...antoraYml};
+    if (argv.antora._config) {
+      antoraYml = YAML.parse(fs.readFileSync(argv.antora._config, 'utf-8'));
+    }
+    doxygen2adoc.antora = {...doxygen2adoc.antora, ...antoraYml, ...argv.antora};
   }
 
   // Register partial templates
