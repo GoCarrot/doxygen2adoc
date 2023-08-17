@@ -34,6 +34,20 @@ endif::[]
 {{/each}}
 {{/if}}
 
+{{#if upgrade_note}}
+== Upgrade Notes
+{{#each upgrade_note}}
+{{> change}}
+{{/each}}
+{{/if}}
+
+{{#if enhancement}}
+== Enhancements
+{{#each enhancement}}
+{{> change}}
+{{/each}}
+{{/if}}
+
 {{#if bug}}
 == Bug Fixes
 {{#each bug}}
