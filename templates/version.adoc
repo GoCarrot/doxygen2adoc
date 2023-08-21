@@ -55,6 +55,13 @@ endif::[]
 {{/each}}
 {{/if}}
 
+{{#if known_issue}}
+== Known Issues
+{{#each known_issue}}
+{{> change}}
+{{/each}}
+{{/if}}
+
 {{#if ios}}
 :version-title: iOS
 include::ios:changelog:partial${{ios}}.adoc[leveloffset=+1]
