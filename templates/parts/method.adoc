@@ -6,7 +6,7 @@ ifdef::part_decl[]
 [subs=+attributes]
 ++++
 <pre class="highlightjs highlight"><code class="language-{source-language} hljs" data-lang="{source-language}">{{{declaration}}}</code></pre>
-[.referencelink]#xref:{{{@root.antora.name}}}:{{{@root.antora.module}}}:{{{parent.id}}}.adoc#{{{id}}}[API Reference, window=_blank]#
+xref:{{{@root.antora.name}}}:{{{@root.antora.module}}}:{{{parent.id}}}.adoc#{{{id}}}[API Reference, window=_blank, class="referencelink"]
 ++++
 endif::[]
 
