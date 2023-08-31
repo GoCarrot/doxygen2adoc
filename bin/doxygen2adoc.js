@@ -34,6 +34,24 @@ Handlebars.registerHelper('isArray', function(test) {
   return Array.isArray(test);
 });
 
+const sortArrayOfObjects = (arr, propertyName, order = 'ascending') => {
+  const sortedArr = arr.sort((a, b) => {
+    if (a[propertyName] < b[propertyName]) {
+      return -1;
+    }
+    if (a[propertyName] > b[propertyName]) {
+      return 1;
+    }
+    return 0;
+  });
+
+  if (order === 'descending') {
+    return sortedArr.reverse();
+  }
+
+  return sortedArr;
+};
+
 //
 // Process config
 //
@@ -119,16 +137,17 @@ const cmdBuild = (argv) => {
   }, {});
 
   const compoundRefs = doxygen2adoc.build(argv.input, argv.source);
+  const sortedRefs = sortArrayOfObjects(compoundRefs, "name");
 
   // Exclude unwanted compounds from the write
-  const filteredRefs = compoundRefs.filter((compound) => {
+  const filteredRefs = sortedRefs.filter((compound) => {
     return !argv.exclude.includes(compound.kind);
   });
 
   // Clean if needed
   cmdClean(argv);
 
-  // Write out componds
+  // Write out compounds
   const partMap = {};
   filteredRefs.forEach((compoundRef) => {
     if (compiledTemplates[compoundRef.kind]) {
