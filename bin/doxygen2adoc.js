@@ -186,6 +186,16 @@ const cmdBuild = (argv) => {
 
   if (compiledTemplates['nav']) {
     fs.writeFileSync(argv.nav, compiledTemplates['nav']({items: compounds}));
+
+    // Write out second nav file into a partials directory
+    const partialsDir = path.join(argv.output, 'partials');
+    if (!fs.existsSync(partialsDir)) {
+      fs.mkdirSync(partialsDir, { recursive: true });
+    }
+    fs.writeFileSync(
+      path.join(partialsDir, 'api-nav.adoc'),
+      compiledTemplates['nav']({items: compounds})
+    );
   }
 
   // Write out changelog
