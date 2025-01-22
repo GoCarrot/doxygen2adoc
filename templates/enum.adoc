@@ -1,0 +1,30 @@
+{{> enumTitle}}
+
+{{{brief}}}
+
+{{#if deprecated}}
+[CAUTION]
+====
+{{{deprecatedDocs}}}
+====
+{{/if}}
+
+{{#if attributes}}== Values
+[cols="1,2a", stripes="even"]
+|===
+|Name |Description
+
+{{#each attributes}}
+{{#unless return.type}}
+|[[{{id}}]]``{{name}}``
+
+|{{{brief}}}
+{{/unless}}
+{{/each}}
+|===
+{{/if}}
+
+{{#if methods}}== Methods
+{{#each methods}}
+{{> function}}
+{{/each}}{{/if}}

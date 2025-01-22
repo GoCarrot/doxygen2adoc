@@ -19,6 +19,7 @@ const _ = (template) => {
 self.templates = {
   struct: _('struct.adoc'),
   class: _('struct.adoc'),
+  enum: _('enum.adoc'),
   file: null,
   dir: null,
   index: null,
@@ -33,6 +34,7 @@ self.partials = {
   function: _('partial/function.adoc'),
   functionTitle: _('partial/functionTitle.adoc'),
   structTitle: _('partial/structTitle.adoc'),
+  enumTitle: _('partial/enumTitle.adoc'),
 };
 
 // Built in partial output templates
