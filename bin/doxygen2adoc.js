@@ -144,6 +144,11 @@ const cmdBuild = (argv) => {
     return !argv.exclude.includes(compound.kind);
   });
 
+  // Instantiate all compounds so docs can interlink regardless of sort order.
+  // These need to be separate steps because compound is lazily created.
+  filteredRefs.forEach((compoundRef) => { compoundRef.compound });
+  filteredRefs.forEach((compoundRef) => { compoundRef.compound.finalize() });
+
   // Clean if needed
   cmdClean(argv);
 
