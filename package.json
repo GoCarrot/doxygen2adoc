@@ -1,6 +1,6 @@
 {
   "name": "doxygen2adoc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Read in Doxygen XML, turn it into AsciiDoc.",
   "main": "index.js",
   "type": "module",
