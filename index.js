@@ -93,59 +93,77 @@ self.build = (inputPath, sourcePath) => {
     preserveOrder: true,
   });
 
-  // XML Parser for general use
+  // XML Parser for general use. As of fast-xml-parser 5.5, `stopNodes` content
+  // is never fed through `tagValueProcessor`, so the `<type>` rewrite that
+  // converts <ref> children into HTML <a> anchors runs as a post-parse walk
+  // below.
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: '$',
     stopNodes: ['*.type', '*.briefdescription', '*.detaileddescription'],
-    tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
-      if (tagName === 'type') {
-        // Sanity check
-        if (jPath !== 'doxygen.compounddef.sectiondef.memberdef.type' &&
-            jPath !== 'doxygen.compounddef.sectiondef.memberdef.param.type') {
-          throw new Error(`Unexpected <type> found at ${jPath}`);
-        }
-
-        const type = tagValueParser.parse(`<type>${tagValue}</type>`)[0].type;
-        const combinedType = type.reduce((str, elem) => {
-          // Strip out Doxygen including spaces in template types
-          let text = elem.ref ? elem.ref[0].$text : elem.$text;
-          text = text.replaceAll('< ', '<')
-              .replaceAll(' >', '>')
-              .replaceAll('>', '&gt;')
-              .replaceAll('<', '&lt;');
-
-          if (elem.ref) {
-            assert.strictEqual(elem.ref.length, 1, 'More than one ref during type parsing');
-
-            // This is only used inside 'type' tags, and the end result is
-            // that it's only showing up in the 'declaration' on rendered pages.
-            //
-            // The 'declaration' is rendered in a source block, so putting adoc
-            // markup inside that block is not useful. Instead we have to directly
-            // render it as HTML.
-
-            // TODO: This is hard-coded formatting, it would be better to have some
-            //       kind of partial-template, but right now the CLI is the only
-            //       thing that knows about anything template related.
-            const refId = elem[':@'].$refid;
-            const refSource = refMapping[refId];
-            const version = 'latest' || self.antora.version; // Hax, not sure what to do about this
-            const module = self.antora.module ? `/${self.antora.module}` : '';
-            const refText = refSource ?
-              `<a href="/${self.antora.name}/${version}${module}/${refSource}.html#${refId}">${text}</a>` :
-              `<a href="/${self.antora.name}/${version}${module}/${refId}.html">${text}</a>`;
-
-            return `${str}${text.endsWith('&gt;') || str.endsWith('&lt;') ? '' : ' '}${refText}`.trim();
-          } else {
-            return `${str}${text.endsWith('&gt;') || str.endsWith('&lt;') ? '' : ' '}${text}`.trim();
-          }
-        }, '');
-        return combinedType;
-      }
-      return undefined;
-    },
   });
+
+  const rewriteType = (rawType) => {
+    const type = tagValueParser.parse(`<type>${rawType}</type>`)[0].type;
+    return type.reduce((str, elem) => {
+      // Strip out Doxygen including spaces in template types
+      let text = elem.ref ? elem.ref[0].$text : elem.$text;
+      text = text.replaceAll('< ', '<')
+          .replaceAll(' >', '>')
+          .replaceAll('>', '&gt;')
+          .replaceAll('<', '&lt;');
+
+      if (elem.ref) {
+        assert.strictEqual(elem.ref.length, 1, 'More than one ref during type parsing');
+
+        // This is only used inside 'type' tags, and the end result is
+        // that it's only showing up in the 'declaration' on rendered pages.
+        //
+        // The 'declaration' is rendered in a source block, so putting adoc
+        // markup inside that block is not useful. Instead we have to directly
+        // render it as HTML.
+
+        // TODO: This is hard-coded formatting, it would be better to have some
+        //       kind of partial-template, but right now the CLI is the only
+        //       thing that knows about anything template related.
+        const refId = elem[':@'].$refid;
+        const refSource = refMapping[refId];
+        const version = 'latest' || self.antora.version; // Hax, not sure what to do about this
+        const module = self.antora.module ? `/${self.antora.module}` : '';
+        const refText = refSource ?
+          `<a href="/${self.antora.name}/${version}${module}/${refSource}.html#${refId}">${text}</a>` :
+          `<a href="/${self.antora.name}/${version}${module}/${refId}.html">${text}</a>`;
+
+        return `${str}${text.endsWith('&gt;') || str.endsWith('&lt;') ? '' : ' '}${refText}`.trim();
+      } else {
+        return `${str}${text.endsWith('&gt;') || str.endsWith('&lt;') ? '' : ' '}${text}`.trim();
+      }
+    }, '');
+  };
+
+  const rewriteMemberTypes = (tree) => {
+    const compounddef = tree?.doxygen?.compounddef;
+    if (!compounddef) return tree;
+    const sectiondefs = Array.isArray(compounddef.sectiondef) ?
+      compounddef.sectiondef : (compounddef.sectiondef ? [compounddef.sectiondef] : []);
+    for (const sectiondef of sectiondefs) {
+      const memberdefs = Array.isArray(sectiondef.memberdef) ?
+        sectiondef.memberdef : (sectiondef.memberdef ? [sectiondef.memberdef] : []);
+      for (const memberdef of memberdefs) {
+        if (typeof memberdef.type === 'string') {
+          memberdef.type = rewriteType(memberdef.type);
+        }
+        const params = Array.isArray(memberdef.param) ?
+          memberdef.param : (memberdef.param ? [memberdef.param] : []);
+        for (const param of params) {
+          if (typeof param.type === 'string') {
+            param.type = rewriteType(param.type);
+          }
+        }
+      }
+    }
+    return tree;
+  };
 
   // Provider reads files
   const provider = {
@@ -160,7 +178,7 @@ self.build = (inputPath, sourcePath) => {
     xml: (name) => {
       const file = path.join(inputPath, `${name}.xml`);
       console.log(`Reading file ${file}`); // TODO: Verbose
-      return parser.parse(fs.readFileSync(file, 'utf8'));
+      return rewriteMemberTypes(parser.parse(fs.readFileSync(file, 'utf8')));
     },
   };
 
