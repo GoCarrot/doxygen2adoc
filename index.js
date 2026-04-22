@@ -141,27 +141,36 @@ self.build = (inputPath, sourcePath) => {
     }, '');
   };
 
+  // Paths at which a <type> element is expected to appear. Anything else is
+  // either a schema surprise (bump fast-xml-parser, new Doxygen version) or a
+  // real bug; either way the user of this library deserves a loud failure
+  // rather than silently un-rewritten refs.
+  const EXPECTED_TYPE_PATHS = new Set([
+    'doxygen.compounddef.sectiondef.memberdef.type',
+    'doxygen.compounddef.sectiondef.memberdef.param.type',
+  ]);
+
   const rewriteMemberTypes = (tree) => {
-    const compounddef = tree?.doxygen?.compounddef;
-    if (!compounddef) return tree;
-    const sectiondefs = Array.isArray(compounddef.sectiondef) ?
-      compounddef.sectiondef : (compounddef.sectiondef ? [compounddef.sectiondef] : []);
-    for (const sectiondef of sectiondefs) {
-      const memberdefs = Array.isArray(sectiondef.memberdef) ?
-        sectiondef.memberdef : (sectiondef.memberdef ? [sectiondef.memberdef] : []);
-      for (const memberdef of memberdefs) {
-        if (typeof memberdef.type === 'string') {
-          memberdef.type = rewriteType(memberdef.type);
-        }
-        const params = Array.isArray(memberdef.param) ?
-          memberdef.param : (memberdef.param ? [memberdef.param] : []);
-        for (const param of params) {
-          if (typeof param.type === 'string') {
-            param.type = rewriteType(param.type);
+    const walk = (node, jPath) => {
+      if (Array.isArray(node)) {
+        for (const child of node) walk(child, jPath);
+        return;
+      }
+      if (node === null || typeof node !== 'object') return;
+      for (const [key, value] of Object.entries(node)) {
+        const childPath = jPath ? `${jPath}.${key}` : key;
+        if (key === 'type' && typeof value === 'string') {
+          if (EXPECTED_TYPE_PATHS.has(childPath)) {
+            node[key] = rewriteType(value);
+          } else if (value.includes('<ref')) {
+            throw new Error(`Unexpected <type> with ref at ${childPath}`);
           }
+        } else {
+          walk(value, childPath);
         }
       }
-    }
+    };
+    walk(tree, '');
     return tree;
   };
 
