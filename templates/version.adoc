@@ -41,6 +41,13 @@ endif::[]
 {{/each}}
 {{/if}}
 
+{{#if deprecation}}
+== Deprecations
+{{#each deprecation}}
+{{> change}}
+{{/each}}
+
+{{/if}}
 {{#if enhancement}}
 == Enhancements
 {{#each enhancement}}
