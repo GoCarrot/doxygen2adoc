@@ -8,6 +8,7 @@ import yargs from 'yargs';
 import Handlebars from 'handlebars';
 import doxygen2adoc from '../index.js';
 import commands from './lib/commands.js';
+import changelog from './lib/changelog.js';
 
 // Auto-build the template config options
 const templates = Object.keys(doxygen2adoc.templates).reduce((hsh, name) => {
@@ -214,6 +215,47 @@ const cmdChangelog = (argv) => {
   commands.changelog(argv, compiledTemplates);
 };
 
+const changelogDirs = (argv) => {
+  const versions = argv.changelog && argv.changelog.input;
+  if (!versions) {
+    console.error('changelog.input is required');
+    process.exit(1);
+  }
+  return {
+    versions,
+    unreleased: argv.changelog.unreleased || path.join(versions, '..', 'unreleased'),
+  };
+};
+
+//
+// changelog check
+//
+const cmdChangelogCheck = (argv) => {
+  const problems = changelog.check(changelogDirs(argv));
+  if (problems.length) {
+    problems.forEach((problem) => console.error(problem));
+    process.exit(1);
+  }
+};
+
+//
+// changelog roll
+//
+const cmdChangelogRoll = (argv) => {
+  try {
+    const {target, fragments} = changelog.roll({...changelogDirs(argv), version: argv.release});
+    if (fragments.length === 0) {
+      console.log('No unreleased fragments to roll');
+    } else {
+      console.log(`Rolled ${fragments.length} fragment(s) into ${target}:`);
+      fragments.forEach((file) => console.log(`  ${file}`));
+    }
+  } catch (e) {
+    console.error(e.message);
+    process.exit(1);
+  }
+};
+
 //
 // Command line options
 //
@@ -229,7 +271,17 @@ yargs(process.argv.slice(2))
       return yargs;
     }, cmdBuild)
     .command('changelog', 'Build a changelog from YAML version files', (yargs) => {
-      return yargs;
+      return yargs
+          .command('check', 'Validate version files and unreleased fragments', (yargs) => {
+            return yargs;
+          }, cmdChangelogCheck)
+          .command('roll <release>', 'Merge unreleased fragments into a version file',
+              (yargs) => {
+                return yargs.positional('release', {
+                  describe: 'Version to roll into, e.g. 4.4.0',
+                  type: 'string',
+                });
+              }, cmdChangelogRoll);
     }, cmdChangelog)
     .options(Object.assign(templates, {
       'input': {
@@ -293,6 +345,11 @@ yargs(process.argv.slice(2))
       },
       'changelog.output': {
         describe: 'Destination path for changelog versions',
+        normalize: true,
+      },
+      'changelog.unreleased': {
+        describe: 'Location of unreleased changelog fragments',
+        defaultDescription: '<changelog.input>/../unreleased',
         normalize: true,
       },
       'changelog.index': {

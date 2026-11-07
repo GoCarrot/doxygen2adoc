@@ -13,6 +13,30 @@ configurations and appropriate partial templates.
 
 The generated docs can be found at: http://docs.gocarrot-dev.com
 
+== Changelog
+
+`changelog` renders every `<changelog.input>/<version>.yaml` into an AsciiDoc partial. Each file
+maps a category (`breaking`, `new`, `upgrade_note`, `deprecation`, `enhancement`, `bug`,
+`known_issue`) to a list of entries.
+
+Unreleased entries live one file per change in `changelog.unreleased` (default: an `unreleased`
+directory next to `changelog.input`), named after the change, e.g. `unreleased/c-834.yaml`:
+
+  bug:
+    - "Fixed ``Foo`` when bar."
+
+Each change gets its own file, so parallel PRs never edit the same one.
+
+  doxygen2adoc --config .doxygen2adoc.yml changelog check        # validate versions + fragments
+  doxygen2adoc --config .doxygen2adoc.yml changelog roll 4.4.0   # merge fragments into 4.4.0.yaml
+
+`check` fails on unparseable YAML, duplicate keys, unknown categories (they'd silently not
+render), non-version file names in `changelog.input`, and `ios`/`android` keys in a fragment.
+
+`roll` runs `check`, then appends every fragment's entries to `<version>.yaml`, creating it
+if needed, and deletes the fragments. Existing entries stay put; fragments append in file
+name order. Commit the result.
+
 == Errors
 
 If you see:
