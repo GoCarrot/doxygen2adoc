@@ -98,6 +98,19 @@ self.check = ({versions, unreleased}) => {
   return problems;
 };
 
+// Render order of a top-level key; native version keys sort after every category.
+const keyOrder = (key) => {
+  const i = self.categories.indexOf(key);
+  return i === -1 ? self.categories.length : i;
+};
+
+// Inserts a new category ahead of the first key that renders after it.
+const insertCategory = (map, pair) => {
+  const order = keyOrder(pair.key.value);
+  const at = map.items.findIndex((item) => keyOrder(item.key.value) > order);
+  map.items.splice(at === -1 ? map.items.length : at, 0, pair);
+};
+
 // Merges every fragment into versions/<version>.yaml (creating it if needed), then deletes the
 // fragments. Within a category, entries keep their existing order and fragments append in file
 // name order. Returns {target, fragments}; throws without writing anything if any file is invalid.
@@ -129,7 +142,7 @@ self.roll = ({versions, unreleased, version}) => {
       if (existing) {
         existing.items.push(...entries.items);
       } else {
-        doc.set(category, entries);
+        insertCategory(doc.contents, doc.createPair(category, entries));
       }
     }
   }

@@ -47,8 +47,21 @@ test('roll appends to an existing version file without touching its entries', ()
   changelog.roll({...dirs, version: '4.4.0'});
 
   assert.equal(read(dirs, '4.4.0'),
-      'bug:\n  - "Already ``shipped`` in beta0"\n  - Fixed C\nios: 4.4.0\n' +
-      'enhancement:\n  - Faster C\n');
+      'enhancement:\n  - Faster C\nbug:\n  - "Already ``shipped`` in beta0"\n  - Fixed C\n' +
+      'ios: 4.4.0\n');
+});
+
+test('roll inserts a new category in render order, ahead of native versions', () => {
+  const dirs = setup({
+    'versions/4.4.0.yaml': 'new:\n  - Added A\nknown_issue:\n  - Issue A\nandroid: ~\n',
+    'unreleased/c-11.yaml': 'bug:\n  - Fixed A\nbreaking:\n  - Broke A\n',
+  });
+
+  changelog.roll({...dirs, version: '4.4.0'});
+
+  assert.equal(read(dirs, '4.4.0'),
+      'breaking:\n  - Broke A\nnew:\n  - Added A\nbug:\n  - Fixed A\n' +
+      'known_issue:\n  - Issue A\nandroid: ~\n');
 });
 
 test('roll keeps nested entries and long lines intact', () => {
@@ -99,6 +112,7 @@ test('check passes clean files', () => {
 test('check reports each class of problem', () => {
   const dirs = setup({
     'versions/unreleased.yaml': 'bug:\n  - Misplaced\n',
+    'versions/4.3.15.yaml': '',
     'versions/4.3.16.yaml': 'new:\n  - This line ends in a colon, so it becomes a map:\n',
     'unreleased/c-9.yaml': 'ios: 4.4.0\nbug:\n',
     'unreleased/c-10.yaml': 'bug:\n  - One\nbug:\n  - Two\n',
@@ -106,6 +120,7 @@ test('check reports each class of problem', () => {
 
   const problems = changelog.check(dirs).map((p) => p.replace(path.dirname(dirs.versions), ''));
   assert.deepEqual(problems, [
+    '/versions/4.3.15.yaml: expected a map of category to list of entries',
     '/versions/4.3.16.yaml: new[0].This line ends in a colon, so it becomes a map: ' +
       'expected text, got nothing',
     '/versions/unreleased.yaml: file name must be a version (fragments go in ' +
