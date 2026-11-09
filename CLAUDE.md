@@ -51,31 +51,3 @@ Handlebars is used everywhere output is produced. `index.js` exports three templ
 ## Branching conventions
 
 `fix/`, `feat/`, `maint/` prefixes; keep branches single-purpose.
-
-## Commit message format
-
-Every commit must append a Human-Claude Interaction Log to the commit message, using this exact shape:
-
-```
-<normal commit subject and body>
-
-## Human-Claude Interaction Log
-
-### Human prompts (VERBATIM - include typos, informal language, COMPLETE text):
-**Include EVERY prompt since last commit - even short ones, corrections, clarifications**
-1. "[Copy-paste ENTIRE first prompt since last commit]"
-   → Claude: [What Claude did in response]
-
-2. "[Copy-paste ENTIRE second prompt - including [Request interrupted] if present]"
-   → Claude: [How Claude adjusted]
-
-[Continue numbering ALL prompts - don't skip any or judge importance]
-
-### Key decisions made:
-- Human guided: [specific guidance provided]
-- Claude discovered: [patterns found]
-
-🤖 Generated with Claude Code
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
