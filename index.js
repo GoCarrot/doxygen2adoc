@@ -70,7 +70,9 @@ self.refMap = (inputPath) => {
     return firstPass.parse(fs.readFileSync(file, 'utf8'));
   };
 
-  firstPassXml('index').doxygenindex.compound.forEach((compound) => {
+  // fast-xml-parser yields an object, not an array, when there is only one element.
+  const compounds = [].concat(firstPassXml('index').doxygenindex.compound);
+  compounds.forEach((compound) => {
     if (compound.member) {
       const members = Array.isArray(compound.member) ? compound.member : [compound.member];
       members.forEach((member) => {
@@ -194,7 +196,7 @@ self.build = (inputPath, sourcePath) => {
 
   // Read the index, create compound refs and return them
   const index = provider.xml('index');
-  return index.doxygenindex.compound.map((compound) => {
+  return [].concat(index.doxygenindex.compound).map((compound) => {
     return new CompoundRef(compound, provider);
   });
 };
