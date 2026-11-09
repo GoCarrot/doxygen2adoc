@@ -13,7 +13,7 @@ ESM-only (`"type": "module"`). Target runtime is Node LTS (`.nvmrc` = `lts/*`).
 - Install: `yarn install`
 - Lint: `yarn lint` (ESLint — Google config, `max-len` 100)
 - Run the CLI during development: `./bin/doxygen2adoc.js build -i <doxygen-xml-dir> -o <out-dir>`
-- Test: `yarn test` (`node:test`, files under `test/`). Only the changelog commands are covered.
+- Test: `yarn test` (`node:test`, files under `test/`). Covers the changelog commands and property parts.
 
 The CLI takes most input via a `--config <file>.{yml,json}` rather than flags; every CLI option is also a config key. The two subcommands are `build` and `changelog`; `changelog` also has `check` and `roll <release>` (`bin/lib/changelog.js`) for per-change fragments in `changelog.unreleased`.
 
