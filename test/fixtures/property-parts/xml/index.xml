@@ -5,6 +5,4 @@
     <member refid="interface_teak_user_configuration_1adf2bb9378f41dbe97e9810c567558d89" kind="property"><name>optOutFacebook</name></member>
     <member refid="interface_teak_user_configuration_1readonlyfixture" kind="property"><name>isConfigured</name></member>
   </compound>
-  <compound refid="_teak_user_configuration_8h" kind="file"><name>TeakUserConfiguration.h</name>
-  </compound>
 </doxygenindex>
