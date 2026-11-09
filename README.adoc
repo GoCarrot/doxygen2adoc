@@ -13,6 +13,20 @@ configurations and appropriate partial templates.
 
 The generated docs can be found at: http://docs.gocarrot-dev.com
 
+== Parts
+
+`parts` in the config writes one embeddable partial per member, named `<Compound>_<member>.adoc`,
+and records it as the member's `part` in the symbol map. Keys: `methods`, `staticMethods`,
+`properties`. `~` uses the built-in template.
+
+  parts:
+    methods: ~
+    properties: ~
+
+A part is a set of `ifdef` sections, switched on by the including page:
+`part_brief`, `part_decl`, `part_description`, and for methods `part_params`; for properties
+`part_deprecated` (a caution block). Set the attributes before the embed, e.g. `:part_brief:`.
+
 == Changelog
 
 `changelog` renders every `<changelog.input>/<version>.yaml` into an AsciiDoc partial. Each file

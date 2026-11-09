@@ -41,6 +41,7 @@ self.partials = {
 self.parts = {
   methods: _('parts/method.adoc'),
   staticMethods: _('parts/method.adoc'),
+  properties: _('parts/property.adoc'),
 };
 
 // Antora configuration
