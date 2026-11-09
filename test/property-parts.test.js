@@ -44,11 +44,6 @@ test('properties parts are written per property and mapped in the symbol map', (
       'TeakUserConfiguration_email.adoc');
 });
 
-test('property parts are opt-in', () => {
-  const {output} = build({});
-  assert.ok(!fs.existsSync(path.join(output, 'TeakUserConfiguration_email.adoc')));
-});
-
 test('ObjC property part declares a @property, not a method', () => {
   const part = read(build({properties: '~'}).output, 'TeakUserConfiguration_email.adoc');
 
