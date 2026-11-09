@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen version="1.10.0" xml:lang="en-US">
+  <compounddef id="interface_teak_user_configuration" kind="class" language="Objective-C" prot="public">
+    <compoundname>TeakUserConfiguration</compoundname>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="interface_teak_user_configuration_1ac7898aadb3c01b1f37c13b6674feb8db" prot="public" static="no" readable="yes" writable="yes" gettable="no" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no" accessor="copy">
+        <type>NSString *_Nullable</type>
+        <definition>NSString* _Nullable TeakUserConfiguration::email</definition>
+        <argsstring></argsstring>
+        <name>email</name>
+        <qualifiedname>TeakUserConfiguration::email</qualifiedname>
+        <read></read>
+        <write></write>
+        <briefdescription>
+<para>The email address for the current user. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Teak/TeakUserConfiguration.h" line="8" column="21" bodyfile="Teak/TeakUserConfiguration.h" bodystart="8" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="interface_teak_user_configuration_1adf2bb9378f41dbe97e9810c567558d89" prot="public" static="no" readable="yes" writable="yes" gettable="no" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no" accessor="assign">
+        <type>BOOL</type>
+        <definition>BOOL TeakUserConfiguration::optOutFacebook</definition>
+        <argsstring></argsstring>
+        <name>optOutFacebook</name>
+        <qualifiedname>TeakUserConfiguration::optOutFacebook</qualifiedname>
+        <read></read>
+        <write></write>
+        <briefdescription>
+<para>Opt this user out of Facebook access token collection. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><xrefsect id="deprecated_1_deprecated000005"><xreftitle>Deprecated</xreftitle><xrefdescription><para>Has no effect unless <computeroutput>TeakSDK5Behaviors</computeroutput> has been set to false in your Info.plist; as of SDK 4.2.0, Teak no longer automatically collects the Facebook access token by default. </para>
+</xrefdescription></xrefsect></para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Teak/TeakUserConfiguration.h" line="22" column="7" bodyfile="Teak/TeakUserConfiguration.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="interface_teak_user_configuration_1readonlyfixture" prot="public" static="no" readable="yes" writable="no" gettable="no" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no" accessor="assign">
+        <type>BOOL</type>
+        <definition>BOOL TeakUserConfiguration::isConfigured</definition>
+        <argsstring></argsstring>
+        <name>isConfigured</name>
+        <qualifiedname>TeakUserConfiguration::isConfigured</qualifiedname>
+        <read></read>
+        <write></write>
+        <briefdescription>
+<para>Whether this configuration has any data set. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Teak/TeakUserConfiguration.h" line="40" column="7"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

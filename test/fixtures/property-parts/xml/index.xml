@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex version="1.10.0" xml:lang="en-US">
+  <compound refid="interface_teak_user_configuration" kind="class"><name>TeakUserConfiguration</name>
+    <member refid="interface_teak_user_configuration_1ac7898aadb3c01b1f37c13b6674feb8db" kind="property"><name>email</name></member>
+    <member refid="interface_teak_user_configuration_1adf2bb9378f41dbe97e9810c567558d89" kind="property"><name>optOutFacebook</name></member>
+    <member refid="interface_teak_user_configuration_1readonlyfixture" kind="property"><name>isConfigured</name></member>
+  </compound>
+  <compound refid="_teak_user_configuration_8h" kind="file"><name>TeakUserConfiguration.h</name>
+  </compound>
+</doxygenindex>
