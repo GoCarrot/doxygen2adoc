@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen version="1.10.0" xml:lang="en-US">
+  <compounddef id="interface_teak" kind="class" language="Objective-C" prot="public">
+    <compoundname>Teak</compoundname>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="interface_teak_1twoparas" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Teak::reportTransaction:</definition>
+        <argsstring></argsstring>
+        <name>reportTransaction:</name>
+        <qualifiedname>Teak::reportTransaction:</qualifiedname>
+        <param>
+          <type>NSString *</type>
+          <declname>jws</declname>
+        </param>
+        <briefdescription>
+<para>Report a transaction. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Report a purchase by passing the transaction's signed JWS.</para>
+<para>Call it from any thread, as often as you like. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Teak/Teak.h" line="10" column="1"/>
+      </memberdef>
+      <memberdef kind="function" id="interface_teak_1withparams" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Teak::identify:</definition>
+        <argsstring></argsstring>
+        <name>identify:</name>
+        <qualifiedname>Teak::identify:</qualifiedname>
+        <param>
+          <type>NSString *</type>
+          <declname>userId</declname>
+        </param>
+        <briefdescription>
+<para>Identify the user. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>First paragraph.</para>
+<para>Second paragraph.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>userId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The user's id. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+<para><simplesect kind="return"><para>Nothing useful. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Teak/Teak.h" line="20" column="1"/>
+      </memberdef>
+      <memberdef kind="function" id="interface_teak_1oneparagraph" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Teak::refresh</definition>
+        <argsstring></argsstring>
+        <name>refresh</name>
+        <qualifiedname>Teak::refresh</qualifiedname>
+        <briefdescription>
+<para>Refresh. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Only one paragraph here. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="Teak/Teak.h" line="30" column="1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>
